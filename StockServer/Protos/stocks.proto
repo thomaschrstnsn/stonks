@@ -1,13 +1,15 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-
 option csharp_namespace = "StockServer";
 
 package stocks;
 
 service Updates {
-  rpc GetStockUpdates (google.protobuf.Empty) returns (stream StockReply);
+  rpc GetStockUpdates (StockRequest) returns (stream StockReply);
+}
+
+message StockRequest {
+  repeated string symbols = 1;
 }
 
 message StockReply {

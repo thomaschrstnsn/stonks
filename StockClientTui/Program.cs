@@ -3,20 +3,23 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
+using StockServer;
 
 using var channel = GrpcChannel.ForAddress("http://localhost:8042");
 var client = new StockServer.Updates.UpdatesClient(channel);
 
 Console.WriteLine("Starting stream from server:");
 
-await StreamFromServer(client);
+var symbols = new[] { "IBM", "Meta", "Alpha", "Apple", "Tesla" };
+
+await StreamFromServer(client, symbols);
 
 Console.WriteLine("Stream ended, bye bye...");
 
 
-static async Task StreamFromServer(StockServer.Updates.UpdatesClient client)
+static async Task StreamFromServer(Updates.UpdatesClient client, string[] symbols)
 {
-    using var call = client.GetStockUpdates(new Empty());
+    using var call = client.GetStockUpdates(new StockRequest{ Symbols = { symbols }});
 
     await foreach (var update in call.ResponseStream.ReadAllAsync())
     {
