@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "StockServer";
+
+package stocks;
+
+service Updates {
+  rpc GetStockUpdates (google.protobuf.Empty) returns (stream StockReply);
+}
+
+message StockReply {
+  string symbol = 1;
+  double bid = 2; // TODO: non-floating point type for no rounding errors
+  double ask = 3; // TODO: non-floating point type for no rounding errors
+}
