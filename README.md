@@ -13,18 +13,6 @@ This is achieved using [Spectre.Console](https://spectreconsole.net/)
 
 ## Running
 
-### Server:
-
-```sh
-cd StockServer
-dotnet run
-```
-
-### Client:
-
-```sh
-cd StockClientTui
-dotnet run
-```
-
+- Server: `dotnet run --project StockServer`
+- Client: `dotnet run --project StockClientTui`
 
