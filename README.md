@@ -9,6 +9,7 @@ Server is a simple [gRPC](https://grpc.io/) server that continously streams rand
 Client is a [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) showing updates to the stock symbols it requests.
 This is achieved using [Spectre.Console](https://spectreconsole.net/)
 
+![screenshot](./screenshot.png)
 
 ## Running
 
