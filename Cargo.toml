@@ -1,0 +1,18 @@
+[package]
+name = "stonks"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "stonks-server"
+path = "src/server.rs"
+
+[dependencies]
+tonic = "0.11"
+prost = "0.12"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+tokio-stream = { version = "0.1" }
+
+[build-dependencies]
+tonic-build = "0.11"
+
