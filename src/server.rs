@@ -81,10 +81,8 @@ impl Updates for StockUpdatesService {
 }
 
 fn initial_state_for_symbol(symbol: &str) -> StockReply {
-    let mut rng = rand::thread_rng();
-
-    let ask = rng.gen::<f64>() * 1000.0f64;
-    let delta = (rng.gen::<f64>() - 0.5f64) * 0.01 * ask;
+    let ask = rand::random::<f64>() * 1000.0;
+    let delta = (rand::random::<f64>() - 0.5) * 0.01 * ask;
 
     StockReply {
         symbol: symbol.to_owned(),
@@ -94,9 +92,7 @@ fn initial_state_for_symbol(symbol: &str) -> StockReply {
 }
 
 fn update(stock: &mut StockReply) {
-    let mut rng = rand::thread_rng();
-
-    let delta = (rng.gen::<f64>() - 0.5f64) * 0.01 * stock.bid;
+    let delta = (rand::random::<f64>() - 0.5) * 0.01 * stock.bid;
 
     stock.bid += delta;
     stock.ask += delta;
