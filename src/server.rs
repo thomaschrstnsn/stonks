@@ -1,9 +1,11 @@
+use rand::prelude::*;
 use std::pin::Pin;
 use std::time::Duration;
 use stocks::updates_server::{Updates, UpdatesServer};
 use stocks::{StockReply, StockRequest};
 use tokio::sync::mpsc;
-use tokio_stream::{wrappers::ReceiverStream, Stream, StreamExt};
+use tokio::time::sleep;
+use tokio_stream::{wrappers::ReceiverStream, Stream};
 use tonic::{transport::Server, Request, Response, Status};
 
 pub mod stocks {
@@ -26,17 +28,17 @@ impl Updates for StockUpdatesService {
     ) -> StockResult<Self::GetStockUpdatesStream> {
         println!("received request: {:?}", request);
 
-        let repeat = std::iter::repeat(StockReply {
-            symbol: "AAPL".to_owned(),
-            bid: 2.0,
-            ask: 3.0,
-        });
-
-        let mut stream = Box::pin(tokio_stream::iter(repeat).throttle(Duration::from_millis(1000)));
+        let mut stocks: Vec<_> = request
+            .into_inner()
+            .symbols
+            .iter()
+            .map(|s| initial_state_for_symbol(s))
+            .collect();
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            while let Some(item) = stream.next().await {
+            let mut stream = stocks.clone().into_iter();
+            while let Some(item) = stream.next() {
                 match tx.send(Result::<_, Status>::Ok(item)).await {
                     Ok(_) => {
                         // item was queued to client
@@ -46,7 +48,28 @@ impl Updates for StockUpdatesService {
                     }
                 }
             }
-            println!("client disconnected");
+
+            loop {
+                sleep(Duration::from_secs_f64(rand::random::<f64>())).await;
+
+                stocks.shuffle(&mut thread_rng());
+
+                let mut stock_to_update: &mut StockReply = stocks.get_mut(0).unwrap();
+
+                update(&mut stock_to_update);
+
+                match tx
+                    .send(Result::<_, Status>::Ok(stock_to_update.clone()))
+                    .await
+                {
+                    Ok(_) => {
+                        // item was queued to client
+                    }
+                    Err(_item) => {
+                        break;
+                    }
+                }
+            }
         });
 
         let output_stream = ReceiverStream::new(rx);
@@ -55,6 +78,28 @@ impl Updates for StockUpdatesService {
             Box::pin(output_stream) as Self::GetStockUpdatesStream
         ))
     }
+}
+
+fn initial_state_for_symbol(symbol: &str) -> StockReply {
+    let mut rng = rand::thread_rng();
+
+    let ask = rng.gen::<f64>() * 1000.0f64;
+    let delta = (rng.gen::<f64>() - 0.5f64) * 0.01 * ask;
+
+    StockReply {
+        symbol: symbol.to_owned(),
+        ask,
+        bid: ask + delta,
+    }
+}
+
+fn update(stock: &mut StockReply) {
+    let mut rng = rand::thread_rng();
+
+    let delta = (rng.gen::<f64>() - 0.5f64) * 0.01 * stock.bid;
+
+    stock.bid += delta;
+    stock.ask += delta;
 }
 
 #[tokio::main]
