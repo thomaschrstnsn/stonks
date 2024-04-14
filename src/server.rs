@@ -37,8 +37,8 @@ impl Updates for StockUpdatesService {
 
         let (tx, rx) = mpsc::channel(128);
         tokio::spawn(async move {
-            let mut stream = stocks.clone().into_iter();
-            while let Some(item) = stream.next() {
+            let stream = stocks.clone().into_iter();
+            for item in stream {
                 match tx.send(Result::<_, Status>::Ok(item)).await {
                     Ok(_) => {
                         // item was queued to client
@@ -54,9 +54,9 @@ impl Updates for StockUpdatesService {
 
                 stocks.shuffle(&mut thread_rng());
 
-                let mut stock_to_update: &mut StockReply = stocks.get_mut(0).unwrap();
+                let stock_to_update: &mut StockReply = stocks.get_mut(0).unwrap();
 
-                update(&mut stock_to_update);
+                update(stock_to_update);
 
                 match tx
                     .send(Result::<_, Status>::Ok(stock_to_update.clone()))
