@@ -10,9 +10,8 @@ path = "src/server.rs"
 [dependencies]
 tonic = "0.11"
 prost = "0.12"
-tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.37", features = ["macros", "rt-multi-thread"] }
 tokio-stream = { version = "0.1" }
-time = "0.3.36"
 rand = "0.8.5"
 
 [build-dependencies]
